@@ -1,0 +1,24 @@
+{
+  "name": "gold_single_test",
+  "ea": "GoldEA",
+  "symbol": "XAUUSD_DUKA",
+  "timeframe": "H1",
+  "period_from": "2020.01.01",
+  "period_to": "2026.06.01",
+  "deposit": 10000,
+  "model": "Every tick based on real ticks",
+  "inputs": {
+    "ADX_Hard_Min": "18",
+    "SL_ATR": "1.7",
+    "TP_R": "2.2",
+    "SessionStartHour": "10",
+    "SessionEndHour": "18",
+    "AllowWednesday": "false"
+  },
+  "acceptance": {
+    "min_profit": 0,
+    "min_profit_factor": 1.1,
+    "max_equity_dd_pct": 18,
+    "min_trades": 100
+  }
+}

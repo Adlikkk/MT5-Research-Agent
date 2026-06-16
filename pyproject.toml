@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mt5-research-agent"
+version = "0.1.0a1"
+description = "Local Windows-only research automation scaffold for MetaTrader 5 Strategy Tester."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "Pillow>=10.0",
+  "pywinauto>=0.6.8",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10",
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+mt5-research-agent = "mt5_research_agent.cli:main"
+
+[tool.setuptools]
+packages = ["mt5_research_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["F"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["mt5_research_agent"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+show_error_codes = true

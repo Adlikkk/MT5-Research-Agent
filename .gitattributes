@@ -1,0 +1,17 @@
+# Normalize line endings: LF in the repository, native in the working tree.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF in the working tree.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+
+# Binary / generated-data files git should not touch.
+*.png binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.exe binary
+*.msi binary
+*.ex5 binary
+*.htm -text
+*.html -text

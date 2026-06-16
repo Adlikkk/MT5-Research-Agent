@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/your-org/mt5-research-agent/tree/main/docs
+    about: Install, MT5 setup, execution modes, troubleshooting, and more.
+  - name: Security policy
+    url: https://github.com/your-org/mt5-research-agent/blob/main/SECURITY.md
+    about: How to report a security concern. Never post account credentials.

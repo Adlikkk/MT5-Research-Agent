@@ -1,0 +1,13 @@
+{
+  "name": "gold_tp_sl_adx_sweep",
+  "base_task": "tasks/examples/gold_single_test.json",
+  "matrix": {
+    "TP_R": ["2.0", "2.1", "2.2", "2.3"],
+    "SL_ATR": ["1.6", "1.7", "1.8"],
+    "ADX_Hard_Min": ["17", "18", "19"]
+  },
+  "limits": {
+    "max_tests": 36,
+    "stop_after_failures": 10
+  }
+}

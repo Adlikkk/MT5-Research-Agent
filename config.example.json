@@ -1,0 +1,13 @@
+{
+  "terminal_path": "",
+  "portable_mode": false,
+  "mt5_window_title_contains": "MetaTrader",
+  "artifacts_dir": "artifacts",
+  "results_dir": "results",
+  "default_timeout_seconds": 30,
+  "shutdown_terminal_after_run": true,
+  "report_path_strategy": "terminal_relative_reports",
+  "allow_stop_existing_terminal": false,
+  "max_parallel_mt5_processes": 1,
+  "process_priority": "below_normal"
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capability for the main window. The UI only makes HTTP calls to the localhost API; no privileged Tauri commands are exposed.",
+  "windows": ["main"],
+  "permissions": ["core:default", "core:window:allow-destroy", "core:window:allow-close"]
+}

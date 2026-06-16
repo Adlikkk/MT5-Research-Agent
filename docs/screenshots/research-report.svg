@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f4efe6"/>
+  <rect x="54" y="42" width="852" height="456" rx="16" fill="#fffdf8" stroke="#cfbea3"/>
+  <text x="86" y="92" fill="#24313a" font-family="Georgia, serif" font-size="28">research_example_gold_request.md</text>
+  <text x="86" y="132" fill="#6b5745" font-family="Consolas, monospace" font-size="18">Best candidate: GOLD-0007</text>
+  <text x="86" y="172" fill="#24313a" font-family="Arial, sans-serif" font-size="20">Every Test Row</text>
+  <rect x="86" y="188" width="788" height="34" fill="#e7dcc9"/>
+  <text x="100" y="211" fill="#463829" font-family="Consolas, monospace" font-size="15">Test ID        PF     Net Profit   DD %   Trades   Result</text>
+  <text x="100" y="250" fill="#2f3d45" font-family="Consolas, monospace" font-size="15">GOLD-0007      1.34   4280.55      11.2   184      PASS</text>
+  <text x="100" y="280" fill="#2f3d45" font-family="Consolas, monospace" font-size="15">GOLD-0007-S01  1.19   1210.10      10.5   61       PASS</text>
+  <text x="100" y="310" fill="#2f3d45" font-family="Consolas, monospace" font-size="15">GOLD-0007-S02  1.11   980.45       14.8   58       PASS</text>
+  <text x="100" y="340" fill="#2f3d45" font-family="Consolas, monospace" font-size="15">GOLD-0007-S03  1.16   1352.20      12.1   65       PASS</text>
+  <text x="86" y="392" fill="#24313a" font-family="Arial, sans-serif" font-size="20">Robustness Notes</text>
+  <text x="100" y="424" fill="#5b4a3b" font-family="Arial, sans-serif" font-size="17">• All splits profitable</text>
+  <text x="100" y="450" fill="#5b4a3b" font-family="Arial, sans-serif" font-size="17">• PF stability remained above the split threshold</text>
+  <text x="100" y="476" fill="#5b4a3b" font-family="Arial, sans-serif" font-size="17">• Drawdown stayed below the hard rejection limit</text>
+</svg>

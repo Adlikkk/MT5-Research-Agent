@@ -1,0 +1,41 @@
+name: MT5 terminal compatibility report
+description: Report whether your broker's MT5 terminal works (or what needed adjusting)
+title: "[MT5 Compat]: "
+labels: ["mt5-compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This helps map which broker terminals work. **Do not include account
+        numbers, server credentials, or balances.** Symbol names and paths are
+        fine (redact your username from paths if you prefer).
+  - type: input
+    id: broker
+    attributes:
+      label: Broker / terminal
+      placeholder: "FP Markets MT5, IC Markets MT5, MetaQuotes demo, ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works out of the box
+        - Works after configuration
+        - Partially works
+        - Does not work
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What worked / what needed adjusting
+      description: "doctor result, symbol suffixes, data-folder location, report path strategy, history availability."
+    validations:
+      required: true
+  - type: input
+    id: symbol
+    attributes:
+      label: Symbol / timeframe tested
+      placeholder: "US30 M15 / XAUUSD H1"

@@ -1,0 +1,106 @@
+# ============================================================================
+# MT5 Research Agent — .gitignore
+# Ignores all private, generated, runtime, build, and local files.
+# Build-critical source (ui/index.html, Tauri icons, test fixtures, docs,
+# curated examples) is re-included via the exceptions at the bottom.
+# ============================================================================
+
+# --- Local config / secrets -------------------------------------------------
+config.json
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# --- Python -----------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# --- Runtime data -----------------------------------------------------------
+results/
+artifacts/
+logs/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# --- MT5 private / generated files (reports, sets, binaries, history) -------
+*.ex5
+*.set
+*.ini
+*.htm
+*.html
+*.xml
+*.png
+*.gif
+*.bmp
+*.hst
+*.fxt
+*.srv
+*.tmp
+MQL5/
+Tester/
+Bases/
+Profiles/
+Logs/
+
+# --- Node / UI --------------------------------------------------------------
+ui/node_modules/
+ui/dist/
+ui/.vite/
+ui/src-tauri/target/
+ui/src-tauri/gen/
+ui/src-tauri/binaries/
+
+# --- Tauri / installers / signed artifacts ----------------------------------
+*.msi
+*.exe
+*.app
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.sig
+
+# --- IDE / OS ---------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Internal task specs / private handoff docs -----------------------------
+MT5_Research_Agent_*BUILD_PROMPT*.md
+MT5_Research_Agent_*TASK*.md
+*_PRIVATE*.md
+
+# ============================================================================
+# Exceptions: keep build-critical and curated source committed despite the
+# broad extension ignores above (last match wins, so these come last).
+# ============================================================================
+!docs/
+!docs/**
+!examples/
+!examples/**
+!tasks/examples/
+!tasks/examples/**
+!experiments/examples/
+!experiments/examples/**
+!tests/fixtures/
+!tests/fixtures/**
+!ui/index.html
+!ui/src-tauri/icons/
+!ui/src-tauri/icons/**

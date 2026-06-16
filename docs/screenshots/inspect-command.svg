@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#101417"/>
+  <rect x="40" y="40" width="880" height="460" rx="18" fill="#182129" stroke="#31424e"/>
+  <rect x="40" y="40" width="880" height="48" rx="18" fill="#22303a"/>
+  <circle cx="74" cy="64" r="8" fill="#ef6b5b"/>
+  <circle cx="100" cy="64" r="8" fill="#e9c04d"/>
+  <circle cx="126" cy="64" r="8" fill="#61c454"/>
+  <text x="160" y="71" fill="#d6e2ea" font-family="Consolas, monospace" font-size="20">python -m mt5_research_agent inspect --backend win32</text>
+  <text x="72" y="130" fill="#8ad6ff" font-family="Consolas, monospace" font-size="22">matched_title: MetaTrader - 1234567</text>
+  <text x="72" y="170" fill="#c9d6de" font-family="Consolas, monospace" font-size="20">process_id: 15124</text>
+  <text x="72" y="206" fill="#c9d6de" font-family="Consolas, monospace" font-size="20">backend: win32</text>
+  <text x="72" y="242" fill="#c9d6de" font-family="Consolas, monospace" font-size="20">visible_children:</text>
+  <text x="104" y="278" fill="#9cc7d8" font-family="Consolas, monospace" font-size="18">- Strategy Tester</text>
+  <text x="104" y="310" fill="#9cc7d8" font-family="Consolas, monospace" font-size="18">- Inputs</text>
+  <text x="104" y="342" fill="#9cc7d8" font-family="Consolas, monospace" font-size="18">- Settings</text>
+  <text x="104" y="374" fill="#9cc7d8" font-family="Consolas, monospace" font-size="18">- Start button</text>
+  <text x="72" y="438" fill="#78e08f" font-family="Consolas, monospace" font-size="18">screenshot: artifacts/screenshots/inspect_20260611T170000Z.png</text>
+</svg>
