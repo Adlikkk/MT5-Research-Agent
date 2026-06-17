@@ -1,5 +1,5 @@
 import { api } from "../api/client";
-import { Card, Empty, JobBadge, PageHead, ProgressBar } from "../components";
+import { Card, EmptyState, JobBadge, PageHead, ProgressBar } from "../components";
 import type { Job } from "../api/types";
 
 // Runs / Queue: live view of every job (queued/running/done/failed). Driven by
@@ -15,7 +15,11 @@ export function Queue({ jobs, onSelect }: { jobs: Job[]; onSelect: (id: string) 
       ) : null}
       <Card>
         {jobs.length === 0 ? (
-          <Empty>No jobs yet. Start a smoke test, optimization, or research run.</Empty>
+          <EmptyState
+            icon="runs"
+            title="No jobs yet"
+            description="Smoke tests, optimizations, and research runs appear here with live progress. Start one from the Agent or Setup tab."
+          />
         ) : (
           <table>
             <thead>

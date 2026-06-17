@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api, getApiBase, setApiBase } from "../api/client";
 import { useAsync } from "../hooks";
-import { Card, ErrorLine, Field, PageHead, Spinner, StatusBadge } from "../components";
+import { AsyncBoundary, Card, Field, PageHead, Spinner, StatusBadge } from "../components";
 import { SessionControl } from "../SessionControl";
 
 export function Settings() {
@@ -78,24 +78,24 @@ export function Settings() {
       </Card>
 
       <Card title="Backend configuration">
-        {config.loading ? <Spinner /> : null}
-        {config.error ? <ErrorLine message={config.error} /> : null}
-        {cfg ? (
-          <div className="kv">
-            <div className="k">Terminal configured</div>
-            <div><StatusBadge status={cfg.terminal_path_configured ? "PASS" : "FAIL"} /></div>
-            <div className="k">Portable mode</div>
-            <div>{cfg.portable_mode ? "yes" : "no"}</div>
-            <div className="k">Artifacts dir</div>
-            <div className="mono">{cfg.artifacts_dir}</div>
-            <div className="k">Results dir</div>
-            <div className="mono">{cfg.results_dir}</div>
-            <div className="k">Report strategy</div>
-            <div>{cfg.report_path_strategy}</div>
-            <div className="k">Max parallel MT5</div>
-            <div>{cfg.max_parallel_mt5_processes}</div>
-          </div>
-        ) : null}
+        <AsyncBoundary state={config}>
+          {(data) => (
+            <div className="kv">
+              <div className="k">Terminal configured</div>
+              <div><StatusBadge status={data.config.terminal_path_configured ? "PASS" : "FAIL"} /></div>
+              <div className="k">Portable mode</div>
+              <div>{data.config.portable_mode ? "yes" : "no"}</div>
+              <div className="k">Artifacts dir</div>
+              <div className="mono">{data.config.artifacts_dir}</div>
+              <div className="k">Results dir</div>
+              <div className="mono">{data.config.results_dir}</div>
+              <div className="k">Report strategy</div>
+              <div>{data.config.report_path_strategy}</div>
+              <div className="k">Max parallel MT5</div>
+              <div>{data.config.max_parallel_mt5_processes}</div>
+            </div>
+          )}
+        </AsyncBoundary>
       </Card>
 
       <Card title="AI provider (optional)">

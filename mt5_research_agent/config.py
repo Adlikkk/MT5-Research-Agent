@@ -41,6 +41,19 @@ class AppConfig:
         )
 
 
+def default_data_dir() -> Path:
+    """Stable per-user data directory for the bundled desktop app.
+
+    The installed app may run from an unpredictable working directory, so config
+    and data live here rather than next to ``config.json`` in the CWD.
+    """
+
+    base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+    if base:
+        return Path(base) / "MT5ResearchAgent"
+    return Path.home() / ".mt5-research-agent"
+
+
 def resolve_config_path(
     env_var_name: str = DEFAULT_CONFIG_ENV_VAR,
     default_path: Path = DEFAULT_CONFIG_PATH,
@@ -48,11 +61,30 @@ def resolve_config_path(
     env_value = os.environ.get(env_var_name)
     if env_value:
         return Path(env_value).expanduser()
-    return default_path
+    # Prefer an existing ./config.json (dev / repo workflow); otherwise use the
+    # stable per-user location so the bundled app has a consistent home.
+    if default_path.exists():
+        return default_path
+    return default_data_dir() / "config.json"
+
+
+def _default_app_config() -> AppConfig:
+    data_dir = default_data_dir()
+    return AppConfig(
+        artifacts_dir=str(data_dir / "artifacts"),
+        results_dir=str(data_dir / "results"),
+    )
 
 
 def load_config(config_path: Path | None = None) -> AppConfig:
     path = config_path or resolve_config_path()
-    with path.open("r", encoding="utf-8") as handle:
-        data = json.load(handle)
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        # Work out of the box: a missing or invalid config yields sensible
+        # per-user defaults instead of crashing every endpoint that needs config.
+        return _default_app_config()
+    if not isinstance(data, dict):
+        return _default_app_config()
     return AppConfig.from_dict(data)

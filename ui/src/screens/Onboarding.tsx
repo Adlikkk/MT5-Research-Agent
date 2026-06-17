@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../api/client";
 import { useAsync } from "../hooks";
-import { Card, ErrorLine, Field, Notice, PageHead, Spinner } from "../components";
+import { AsyncBoundary, Card, ErrorLine, Field, Notice, PageHead } from "../components";
 
 // Setup wizard: detect the MT5 environment (PASS/WARN/FAIL), pick an EA, and run
 // a first smoke test as an async job (the app stays responsive).
@@ -43,25 +43,25 @@ export function Onboarding({ onJobStarted }: { onJobStarted: (jobId: string) => 
       </Notice>
 
       <Card title="MT5 environment">
-        {detect.loading ? <Spinner /> : null}
-        {detect.error ? <ErrorLine message={detect.error} /> : null}
-        {detect.data ? (
-          <table>
-            <tbody>
-              {detect.data.checks.map((c) => (
-                <tr key={c.label}>
-                  <td style={{ width: 64 }}>
-                    <span className={`badge ${c.status === "PASS" ? "pass" : c.status === "FAIL" ? "fail" : "neutral"}`}>
-                      {c.status}
-                    </span>
-                  </td>
-                  <td>{c.label}</td>
-                  <td className="mono muted">{c.detail}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : null}
+        <AsyncBoundary state={detect}>
+          {(data) => (
+            <table>
+              <tbody>
+                {data.checks.map((c) => (
+                  <tr key={c.label}>
+                    <td style={{ width: 64 }}>
+                      <span className={`badge ${c.status === "PASS" ? "pass" : c.status === "FAIL" ? "fail" : "neutral"}`}>
+                        {c.status}
+                      </span>
+                    </td>
+                    <td>{c.label}</td>
+                    <td className="mono muted">{c.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </AsyncBoundary>
         <div className="row-actions" style={{ marginTop: 10 }}>
           <button className="btn ghost" onClick={detect.reload}>Re-detect</button>
         </div>

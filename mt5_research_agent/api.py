@@ -207,10 +207,27 @@ def handle_api_request(method: str, path: str, body: dict[str, Any] | None = Non
     if method == "GET" and route == "/leaderboard":
         return 200, _leaderboard_payload()
 
+    if method == "GET" and route.startswith("/reports/") and route.endswith("/analysis"):
+        from mt5_research_agent.report_intelligence import report_analysis
+
+        test_id = route[len("/reports/"):-len("/analysis")]
+        payload = report_analysis(test_id)
+        return (200 if payload.get("ok") else 404), payload
+
     if method == "GET" and route.startswith("/reports/"):
         test_id = route.split("/reports/", 1)[1]
         payload = build_task_status_payload(test_id)
         return (200 if payload.get("ok") else 404), payload
+
+    if method == "GET" and route == "/latest-run":
+        from mt5_research_agent.report_intelligence import latest_run_analysis
+
+        return 200, latest_run_analysis()
+
+    if method == "GET" and route == "/strategy-board":
+        from mt5_research_agent.report_intelligence import build_strategy_board
+
+        return 200, build_strategy_board()
 
     if method == "GET" and route == "/session":
         from mt5_research_agent.session import session_status
@@ -347,6 +364,15 @@ def handle_api_request(method: str, path: str, body: dict[str, Any] | None = Non
             return 400, {"ok": False, "error": str(exc)}
         return 200, {"ok": True, "plan_path": str(plan_path), "experiment_path": str(experiment_path)}
 
+    if method == "POST" and route == "/agent/parse":
+        from mt5_research_agent.agent_intent import parse_agent_prompt
+
+        prompt = body.get("prompt")
+        if not isinstance(prompt, str) or not prompt.strip():
+            return 400, {"ok": False, "error": "prompt is required"}
+        mode = body.get("mode")
+        return 200, parse_agent_prompt(prompt, mode if isinstance(mode, str) else None)
+
     if method == "POST" and route == "/ea/create":
         prompt_path = body.get("prompt_path")
         if not prompt_path:
@@ -398,12 +424,32 @@ class _Handler(BaseHTTPRequestHandler):
             return {}
 
     def do_GET(self) -> None:  # noqa: N802 - required name
-        status, payload = handle_api_request("GET", self.path)
-        self._respond(status, payload)
+        self._safe_dispatch("GET")
 
     def do_POST(self) -> None:  # noqa: N802 - required name
-        status, payload = handle_api_request("POST", self.path, self._read_body())
-        self._respond(status, payload)
+        self._safe_dispatch("POST")
+
+    def _safe_dispatch(self, method: str) -> None:
+        """Route a request, always returning JSON.
+
+        Any unhandled exception is turned into a 500 JSON body rather than being
+        allowed to crash the connection — an aborted connection surfaces in the
+        desktop webview as an opaque ``Failed to fetch`` with no recovery path.
+        """
+
+        try:
+            body = self._read_body() if method == "POST" else None
+            status, payload = handle_api_request(method, self.path, body)
+        except Exception as exc:  # pragma: no cover - defensive catch-all
+            status, payload = 500, {
+                "ok": False,
+                "error": "Internal server error",
+                "detail": str(exc),
+            }
+        try:
+            self._respond(status, payload)
+        except (BrokenPipeError, ConnectionError):
+            return
 
     def log_message(self, *args: Any) -> None:  # silence default stderr logging
         return

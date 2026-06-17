@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "./api/client";
+import { api, ApiError, pingHealth, type ApiErrorKind } from "./api/client";
 import type { Job } from "./api/types";
 
 export interface AsyncState<T> {
   data: T | null;
   error: string | null;
+  errorKind: ApiErrorKind | null;
   loading: boolean;
   reload: () => void;
 }
@@ -13,6 +14,7 @@ export interface AsyncState<T> {
 export function useAsync<T>(loader: () => Promise<T>, deps: unknown[] = []): AsyncState<T> {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<ApiErrorKind | null>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
 
@@ -22,6 +24,7 @@ export function useAsync<T>(loader: () => Promise<T>, deps: unknown[] = []): Asy
     let active = true;
     setLoading(true);
     setError(null);
+    setErrorKind(null);
     loader()
       .then((result) => {
         if (active) {
@@ -31,6 +34,7 @@ export function useAsync<T>(loader: () => Promise<T>, deps: unknown[] = []): Asy
       .catch((err: unknown) => {
         if (active) {
           setError(err instanceof Error ? err.message : String(err));
+          setErrorKind(err instanceof ApiError ? err.kind : "http");
         }
       })
       .finally(() => {
@@ -44,7 +48,37 @@ export function useAsync<T>(loader: () => Promise<T>, deps: unknown[] = []): Asy
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, tick]);
 
-  return { data, error, loading, reload };
+  return { data, error, errorKind, loading, reload };
+}
+
+export type BackendState = "connecting" | "online" | "offline";
+
+// Polls /health so the shell can show a live API status pill and so screens can
+// distinguish "backend still starting" from a genuine failure.
+export function useBackendStatus(intervalMs = 2000): { state: BackendState; recheck: () => void } {
+  const [state, setState] = useState<BackendState>("connecting");
+  const seen = useRef(false);
+
+  const check = useCallback(() => {
+    pingHealth().then((ok) => {
+      if (ok) {
+        seen.current = true;
+        setState("online");
+      } else {
+        // Before the first successful contact we are "connecting" (backend is
+        // likely still booting); after that, a failure means it went offline.
+        setState(seen.current ? "offline" : "connecting");
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    check();
+    const id = window.setInterval(check, intervalMs);
+    return () => window.clearInterval(id);
+  }, [check, intervalMs]);
+
+  return { state, recheck: check };
 }
 
 const TERMINAL = new Set(["succeeded", "failed", "cancelled"]);

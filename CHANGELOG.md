@@ -3,6 +3,43 @@
 All notable changes to the MT5 Research Agent are documented here. This project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.1-alpha] - 2026-06-17
+
+Product-polish and strategy-intelligence release. No engine/safety changes —
+still Strategy Tester only, no live trading, no `order_send`.
+
+### API reliability (fixes "Failed to fetch")
+- **Tolerant config**: `load_config` now returns sensible per-user defaults
+  (`%LOCALAPPDATA%\MT5ResearchAgent`) instead of raising when `config.json` is
+  missing or malformed, so the bundled app works on first launch.
+- **Handler safety net**: the HTTP handler wraps every request in try/except and
+  always returns JSON (500 on error) — an exception can no longer reset the
+  connection and surface as an opaque `Failed to fetch`.
+- **Resilient UI client**: one shared client with typed `ApiError`
+  (offline/http/parse), auto-retry on network failure, and a "Starting backend…"
+  state. Screens use an `AsyncBoundary` for friendly loading/empty/error states.
+
+### Desktop UI redesign
+- New **app shell**: compact top bar with live status pills (API / MT5 / Session
+  / Jobs / Update), collapsible icon sidebar (sections), collapsible inspector
+  with a live activity stream + elapsed clock.
+- **Agent tab** (primary): plain-language goal -> editable plan (goal chips) ->
+  start research. New `POST /agent/parse` endpoint.
+- Polished Dashboard (latest-test card, quick actions, run heatmap), Setup,
+  grouped Parameter editor, segmented EA Lab, and useful empty states everywhere.
+
+### Strategy intelligence
+- **Verdict engine** (`report_intelligence.py`): deterministic
+  GOOD/PROMISING/WEAK/REJECT/INFRA_ONLY with reasons; GOOD requires split
+  validation (profit alone never qualifies a candidate).
+- **Advanced Report** screen: header, verdict/confidence, metric cards, target
+  bars, long/short counts, analysis, recommended next test. Trade-level
+  breakdowns (equity curve, weekday/session) are shown as *unavailable* rather
+  than faked.
+- **Strategy Board** (replaces Leaderboard): champion / challenger / survivor /
+  rejected. New `GET /latest-run`, `GET /strategy-board`,
+  `GET /reports/:id/analysis`.
+
 ## [0.1.0-alpha] - 2026-06-15
 
 First public **alpha**. Local MT5 Strategy Tester research automation. Tested on

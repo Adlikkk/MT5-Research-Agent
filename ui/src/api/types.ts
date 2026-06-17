@@ -137,6 +137,146 @@ export interface OptimizerPreview {
   error?: string;
 }
 
+export type VerdictCode = "GOOD" | "PROMISING" | "WEAK" | "REJECT" | "INFRA_ONLY";
+
+export interface Verdict {
+  code: VerdictCode;
+  label: string;
+  confidence: "high" | "medium" | "low";
+  reasons: string[];
+}
+
+export interface ReportMetrics {
+  net_profit: number | null;
+  return_pct: number | null;
+  profit_factor: number | null;
+  drawdown_pct: number | null;
+  recovery_factor: number | null;
+  expected_payoff: number | null;
+  total_trades: number | null;
+  winrate_pct: number | null;
+  average_win: number | null;
+  average_loss: number | null;
+  risk_reward: number | null;
+  long_trades: number | null;
+  short_trades: number | null;
+}
+
+export interface LongShort {
+  available: boolean;
+  pnl_available: boolean;
+  long_trades: number | null;
+  short_trades: number | null;
+  long_share_pct: number | null;
+  short_share_pct: number | null;
+}
+
+export interface DataAvailability {
+  summary_metrics: boolean;
+  long_short_counts: boolean;
+  long_short_pnl: boolean;
+  equity_curve: boolean;
+  drawdown_curve: boolean;
+  monthly_breakdown: boolean;
+  weekday_breakdown: boolean;
+  session_breakdown: boolean;
+}
+
+export interface ReportAnalysis {
+  ok: boolean;
+  error?: string;
+  test_id?: string;
+  ea?: string;
+  symbol?: string;
+  timeframe?: string;
+  period?: string;
+  model?: string;
+  deposit?: number | null;
+  run_status?: string;
+  decision_reason?: string;
+  per_rule_results?: Array<Record<string, unknown>>;
+  created_at?: string;
+  verdict: Verdict;
+  metrics: ReportMetrics;
+  split_status: "passed" | "failed" | "pending";
+  strengths: string[];
+  weaknesses: string[];
+  risk_notes: string[];
+  overfit_warnings: string[];
+  data_quality_warnings: string[];
+  recommended_next_test: string;
+  long_short: LongShort;
+  data_available: DataAvailability;
+  trade_level_note: string;
+}
+
+export interface LatestRun extends Partial<ReportAnalysis> {
+  ok: boolean;
+  has_run: boolean;
+}
+
+export interface CandidateCard {
+  test_id: string;
+  ea: string;
+  symbol: string;
+  timeframe: string;
+  run_kind: string;
+  score: number;
+  verdict: Verdict;
+  profit_factor: number | null;
+  drawdown_pct: number | null;
+  total_trades: number | null;
+  return_pct: number | null;
+  validation_status: "passed" | "failed" | "pending";
+  passed: boolean;
+  reason: string;
+  created_at: string;
+}
+
+export interface StrategyBoard {
+  ok: boolean;
+  champion: CandidateCard | null;
+  challengers: CandidateCard[];
+  survivors: CandidateCard[];
+  rejected: CandidateCard[];
+  counts: { champion: number; challengers: number; survivors: number; rejected: number };
+}
+
+export type AgentMode =
+  | "research_existing"
+  | "create_new"
+  | "optimize"
+  | "diagnose"
+  | "report";
+
+export interface AgentGoals {
+  symbol: string | null;
+  timeframe: string | null;
+  target_profit_factor: number | null;
+  target_return_pct: number | null;
+  max_drawdown_pct: number | null;
+  min_trades: number | null;
+  max_tests: number | null;
+  max_runtime_minutes: number | null;
+  split_validation: boolean;
+}
+
+export interface AgentChip {
+  key: keyof AgentGoals;
+  label: string;
+  value: string | number | boolean;
+  kind: "text" | "number" | "bool";
+}
+
+export interface AgentPlan {
+  ok: boolean;
+  mode: AgentMode;
+  mode_label: string;
+  goals: AgentGoals;
+  chips: AgentChip[];
+  summary: string;
+}
+
 export interface Job {
   id: string;
   type: string;

@@ -1,41 +1,67 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../api/client";
 import { useAsync } from "../hooks";
 import { Card, ErrorLine, Field, Notice, PageHead } from "../components";
+import { Icon } from "../icons";
+
+type Group = "Strategy" | "Risk Management" | "Filters" | "Session / Time" | "Execution" | "Advanced";
+
+const GROUPS: Group[] = ["Strategy", "Risk Management", "Filters", "Session / Time", "Execution", "Advanced"];
 
 interface Row {
   name: string;
   value: string;
+  min: string;
+  max: string;
+  step: string;
+  group: Group;
+  enabled: boolean;
+  locked: boolean;
+  initial: string;
 }
 
-// Parameter Editor: edit EA inputs in a grid and preview the generated .set
-// before any run. (Editing happens in the UI; the backend stays the engine.)
+const SEED: Row[] = [
+  { name: "TP_R", value: "2.0", min: "1.0", max: "4.0", step: "0.5", group: "Strategy", enabled: true, locked: false, initial: "2.0" },
+  { name: "ATR_Mult", value: "2.0", min: "1.0", max: "3.5", step: "0.5", group: "Risk Management", enabled: true, locked: false, initial: "2.0" },
+  { name: "MaxSpread", value: "30", min: "10", max: "60", step: "5", group: "Filters", enabled: true, locked: false, initial: "30" },
+  { name: "SessionStart", value: "8", min: "0", max: "23", step: "1", group: "Session / Time", enabled: true, locked: false, initial: "8" },
+];
+
+// Parameter Editor: grouped EA inputs with range/step/enable/lock controls and a
+// .set preview. Editing happens in the UI; the backend stays the research engine.
 export function ParameterEditor() {
   const eas = useAsync(() => api.eas().catch(() => ({ ok: false, eas: [] })), []);
   const [ea, setEa] = useState("");
   const [symbol, setSymbol] = useState("US30");
   const [timeframe, setTimeframe] = useState("M15");
-  const [rows, setRows] = useState<Row[]>([
-    { name: "TP_R", value: "2.0" },
-    { name: "ATR_Mult", value: "2.0" },
-  ]);
+  const [rows, setRows] = useState<Row[]>(SEED);
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const eaList = eas.data?.eas || [];
   const effectiveEa = ea || eaList[0]?.name || "";
 
-  const update = (i: number, key: keyof Row, val: string) => {
-    setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)));
-  };
-  const addRow = () => setRows((prev) => [...prev, { name: "", value: "" }]);
-  const removeRow = (i: number) => setRows((prev) => prev.filter((_, idx) => idx !== i));
+  const update = (idx: number, patch: Partial<Row>) =>
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  const addRow = (group: Group) =>
+    setRows((prev) => [...prev, { name: "", value: "", min: "", max: "", step: "", group, enabled: true, locked: false, initial: "" }]);
+  const removeRow = (idx: number) => setRows((prev) => prev.filter((_, i) => i !== idx));
+
+  const grouped = useMemo(() => {
+    const map = new Map<Group, { row: Row; idx: number }[]>();
+    rows.forEach((row, idx) => {
+      const list = map.get(row.group) ?? [];
+      list.push({ row, idx });
+      map.set(row.group, list);
+    });
+    return map;
+  }, [rows]);
 
   const doPreview = async () => {
     setError(null);
     const inputs: Record<string, string> = {};
     for (const r of rows) {
-      if (r.name.trim()) inputs[r.name.trim()] = r.value;
+      if (r.enabled && r.name.trim()) inputs[r.name.trim()] = r.value;
     }
     try {
       const res = await api.setPreview({ ea: effectiveEa, symbol, timeframe, inputs });
@@ -47,9 +73,10 @@ export function ParameterEditor() {
 
   return (
     <div>
-      <PageHead title="Parameter Editor" subtitle="Edit EA inputs and preview the generated .set before running." />
+      <PageHead title="Parameters" subtitle="Edit EA inputs by group, set optimization ranges, and preview the .set before running." />
       <Notice>
-        Manual overrides are honored. The research engine can suggest ranges; you always confirm before a run.
+        Manual overrides are honored. The research engine can suggest ranges; you always confirm before a run. Disabled
+        rows are omitted from the .set; locked rows are kept fixed during optimization.
       </Notice>
 
       <Card title="Target">
@@ -69,27 +96,54 @@ export function ParameterEditor() {
         </div>
       </Card>
 
-      <Card title="Inputs">
-        <table>
-          <thead>
-            <tr><th>Name</th><th>Value</th><th></th></tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i}>
-                <td><input type="text" value={r.name} onChange={(e) => update(i, "name", e.target.value)} /></td>
-                <td><input type="text" value={r.value} onChange={(e) => update(i, "value", e.target.value)} /></td>
-                <td><button className="btn ghost" onClick={() => removeRow(i)}>✕</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="row-actions" style={{ marginTop: 10 }}>
-          <button className="btn ghost" onClick={addRow}>Add input</button>
-          <button className="btn" onClick={doPreview}>Preview .set</button>
-        </div>
-        {error ? <div style={{ marginTop: 10 }}><ErrorLine message={error} /></div> : null}
-      </Card>
+      {GROUPS.map((group) => {
+        const list = grouped.get(group) ?? [];
+        return (
+          <Card key={group} title={group}>
+            <div className="param-row head">
+              <div>Name</div><div>Value</div><div>Min</div><div>Max</div><div>Step</div><div></div>
+            </div>
+            {list.length === 0 ? (
+              <div className="muted" style={{ fontSize: 12.5, padding: "8px 0" }}>No parameters in this group.</div>
+            ) : (
+              list.map(({ row, idx }) => (
+                <div className={`param-row ${row.enabled ? "" : "disabled"}`} key={idx}>
+                  <div className="param-name">
+                    <input type="text" value={row.name} placeholder="Input" onChange={(e) => update(idx, { name: e.target.value })} />
+                  </div>
+                  <input type="text" value={row.value} disabled={row.locked} onChange={(e) => update(idx, { value: e.target.value })} />
+                  <input type="text" value={row.min} placeholder="—" onChange={(e) => update(idx, { min: e.target.value })} />
+                  <input type="text" value={row.max} placeholder="—" onChange={(e) => update(idx, { max: e.target.value })} />
+                  <input type="text" value={row.step} placeholder="—" onChange={(e) => update(idx, { step: e.target.value })} />
+                  <div className="row-actions" style={{ margin: 0, gap: 4 }}>
+                    <button className="icon-btn small" title={row.enabled ? "Disable" : "Enable"} onClick={() => update(idx, { enabled: !row.enabled })}>
+                      {row.enabled ? "On" : "Off"}
+                    </button>
+                    <button className="icon-btn small" title={row.locked ? "Unlock" : "Lock (fixed in optimization)"} onClick={() => update(idx, { locked: !row.locked })}>
+                      {row.locked ? "🔒" : "🔓"}
+                    </button>
+                    <button className="icon-btn small" title="Reset to initial" onClick={() => update(idx, { value: row.initial })}>
+                      <Icon name="refresh" size={13} />
+                    </button>
+                    <button className="icon-btn small" title="Remove" onClick={() => removeRow(idx)}>
+                      <Icon name="x" size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+            <div className="row-actions" style={{ marginTop: 10 }}>
+              <button className="btn ghost" onClick={() => addRow(group)}>Add parameter</button>
+            </div>
+          </Card>
+        );
+      })}
+
+      <div className="row-actions">
+        <button className="btn" onClick={doPreview}>Preview .set</button>
+        <span className="param-tag">Agent-suggested ranges: coming soon</span>
+      </div>
+      {error ? <div style={{ marginTop: 10 }}><ErrorLine message={error} /></div> : null}
 
       {preview ? (
         <Card title="Generated .set preview">

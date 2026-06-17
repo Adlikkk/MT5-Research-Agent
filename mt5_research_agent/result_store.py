@@ -560,6 +560,18 @@ def fetch_run(test_id: str) -> dict[str, Any] | None:
     return _hydrate_run_row(dict(row)) if row is not None else None
 
 
+def fetch_latest_run() -> dict[str, Any] | None:
+    """Return the most recently created stored run (by ``created_at``)."""
+
+    db_path = init_db()
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        row = connection.execute(
+            "SELECT * FROM runs ORDER BY created_at DESC LIMIT 1"
+        ).fetchone()
+    return _hydrate_run_row(dict(row)) if row is not None else None
+
+
 def fetch_runs() -> list[dict[str, Any]]:
     db_path = init_db()
     with sqlite3.connect(db_path) as connection:
